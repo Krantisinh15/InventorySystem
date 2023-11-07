@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "GetcustomerinvoiceHistory";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+
+<script>
+    $(document).ready(function () {
+        fetchcustomerbyinvoiceid();
+    })
+   
+   
+    function fetchcustomerbyinvoiceid() {
+       
+        $.ajax({
+            url: "/Invoice/GetAllInvoiceProductbycustomerid/" + @ViewBag.invoice_id,
+            method: "Get",
+            contentType: "application/json",
+            success: function (data) {
+              // console.log(data);
+               // console.log(data.data);
+                $("#txtinvoicetable").empty();
+                $("#txtcustomername").val(data[0].customer_name);
+                $("#txtcustomermobile").val(data[0].customer_mobile_no);
+                $("#txtcustomeremail").val(data[0].customer_mail);
+
+                $.each(data, function (i, d) {
+
+                    $.each(d.invoiceModel, function (i, k) {
+                        console.log(d);
+                   
+                   // console.log(d);
+                    //$("#txtinvoicetable").append("<tr><td>" + (i + 1) + "</td><td>" + d.invoice_id + "</td><td>" + d.invoice_date + "</td><td>" + d.product_name + "</td><td>" + d.purchase_Quantity + "</td><td>" + d.total_Amount + "</td></tr>")
+                       
+                    $("#txtinvoicetable").append("<tr><td>" + (i + 1) + "</td><td>" + k.invoice_id + "</td><td>" + k.invoice_date + "</td><td>" + k.remaining_amount + "</td><td>" + k.total_Amount + "</td></tr>");
+                  
+                            $.each(data, function (i, l) {
+                            
+                            $.each(l.invoiceProductModel, function (i, d) {
+                              
+                                if (k.invoice_id == d.invoice_id) {
+                                $("#txtinvoicetable").append("<tr><td>" + d.invoice_id + "</td><td>" + k.invoice_id + "</td><td>" + d.product_name + "</td><td>" + d.purchase_Quantity + "</td></tr>");
+
+
+                                }
+
+                            })
+                           
+                    })
+                    })
+                })
+
+               
+            }
+
+        })
+
+    }
+
+                        //    $("#card").append("<div class='card d-flex' id='cardbody'><div class='card-header'>" + k.invoice_date + "</div></div>")
+
+                        //    $.each(d.invoiceProductModel, function (i, d) {
+
+
+                        //    $("#cardbody").append("<div class='card-body'>" + d.product_name + "</div>")
+
+                        //})
+</script>
+<br />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <table>
+                <tr>
+                <td>
+                    <label>Customer Name :</label>
+                    <input type="text" id="txtcustomername" disabled />
+                </td>
+            </tr>
+          
+            
+            <tr>
+                <td>
+                    <label>Mobile Number :</label>
+                    <input type="text" id="txtcustomermobile" disabled />
+                </td>
+            </tr>
+           
+            <tr>
+                <td>
+                    <label>Email Address : </label>
+                    <input type="text" id="txtcustomeremail" disabled />
+                </td>
+            </tr>
+            </table>
+
+            <br />
+            <br />
+
+        </div>
+        <div class="col-md-6">
+        </div>
+        <hr />
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-3" id="card">
+
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <h2>!! Purchase History !!</h2>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sr.no</th>
+                                <th>Invoice ID</th>
+                                <th>Invoice Date</th>
+                                <th>Products</th>
+                                <th>Purchase Quantity</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="txtinvoicetable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

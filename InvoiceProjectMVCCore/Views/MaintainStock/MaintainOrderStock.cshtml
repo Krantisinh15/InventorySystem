@@ -1,0 +1,402 @@
+﻿
+@{
+    ViewData["Title"] = "MaintainOrderStock";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+<link href="~/css/Orderstock.css" rel="stylesheet" />
+
+
+<script>
+    $(document).ready(function () {
+        getallorder();
+        fetchVenders();
+        fetchCategories();
+        fetchSubCategories();
+        $("#txtcategory").change(function () {
+            fetchSubCategories();
+        })
+        $("#txtsubcategory").change(function () {
+            fetchproducts();
+        })
+        $("#btnadditems").click(function () {
+            AddItems();
+        })
+        $("#btnadd").click(function () {
+            OrderStock();
+        })
+    })
+
+    function fetchVenders() {
+        $.ajax({
+            url: "/MaintainStock/Getvenders",
+            method: "get",
+            contentType: "application/Json",
+            success: function (vender) {
+                $.each(vender, function (i, d) {
+                    $("#txtvender").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    function fetchCategories() {
+        $.ajax({
+            url: "/MaintainStock/GetCategories",
+            method: "get",
+            contentType: "application/Json",
+            success: function (categories) {
+                $.each(categories, function (i, d) {
+                    cui = d.user_id;
+                    $("#txtcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    function fetchSubCategories() {
+        var cid = $("#txtcategory").val();
+        $.ajax({
+            url: "/MaintainStock/GetSubCategoriebyid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (subcategories) {
+                $.each(subcategories, function (i, d) {
+                    $("#txtsubcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    function getallorder() {
+        $.ajax({
+            url: "/MaintainStock/getallorderhistory",
+            method: "get",
+            contentType: "application/Json",
+            success: function (data) {
+                console.log(data);
+                $("#tblorderhistory").empty();
+                $.each(data, function (i, d) {
+
+                    $("#tblorderhistory").append("<tr><td>" + (i + 1) + "</td><td>" + d.vender_name + "</td><td>" + d.order_date + "</td><td><button id='btnedit' class='btn btn-outline-danger' data-bs-toggle='modal' data-bs-target='#vieworderstock' value='View Details' onclick='getorderdetailsbyorderid(" + d.orderStock_id + ")'><i class='bi bi-eye'></i></button></td></tr>")
+                })
+            }
+        })
+    }
+    function getorderdetailsbyorderid(id) {
+        $.ajax({
+
+            url: "/MaintainStock/getproductbysid/" + id,
+            method: "Get",
+            contentType: "application/Json",
+            success: function (data) {
+
+                $("txtorderproductitems").empty();
+                $("#txtdate").val(data[0].order_date);
+                $("#txtvendername").val(data[0].vender_name);
+                $.each(data, function (i, d) {
+                    $("#txtorderproductitems").append("<tr><td>" + (i + 1) + "</td><td>" + d.product_name + "</td><td>" + d.order_product_Quantity + "</td></tr>")
+                })
+            }
+        })
+    }
+   
+    var pname = "";
+    function fetchproducts() {
+        var cid = $("#txtsubcategory").val();
+        $.ajax({
+            url: "/MaintainStock/GetProductbysubcategoryid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (products) {
+
+                $.each(products, function (i, d) {
+                    pname = d.text;
+                    $("#txtproduct").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    var data = [];
+    function AddItems() {
+        var pid = $("#txtproduct").val();
+        var q = $("#txtorderquantity").val();
+        var st = { "ProductId": pid, "OderProductQuantity": q, product_name: pname };
+        console.log(st);
+        data.push(st);
+        Fetchitems();
+    }
+    var ftotal = 0;
+    function Fetchitems() {
+        $("#tblitems").empty();
+        ftotal = 0
+        $.each(data, function (i, d) {
+            console.log(data);
+            ftotal += Number(d.OrderProductQuantity);
+            $("#tblitems").append("<tr><td>" + i + "</td><td>" + d.product_name + "</td><td>" + d.OderProductQuantity + "</td><td><input type='button' value='Delete'onclick='DeleteItem(" + i + ")'/></td></tr>");
+
+        })
+        $("#finaltotal").html(ftotal);
+    }
+    function DeleteItem(id) {
+        data.splice(id, 1);
+        Fetchitems();
+    }
+    function OrderStock() {
+        var date = $("#txtdate").val();
+        var vid = $("#txtvender").val();
+        var st = { "OderDate": date, "VenderId": vid, "TblorderStockProducts": data };
+        console.log(st);
+        $.ajax({
+            url: "/MaintainStock/Orderproducts",
+            method: "Post",
+            data: st,
+            dataType: "json",
+            cache: false,
+            success: function (resp) {
+                alert("Your Order Is placed");
+                console.log(resp)
+                getallorder();
+            }
+        })
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#tblorderhistory tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+<div class="row">
+    <div class="col-md-6">
+        <br />
+        <input type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#Orderstockmodel" value="OrderStock" />
+        <br />
+        <br />
+    </div>
+    <div class="col-md-6">
+
+    @*    <div class="card">
+            <p class="time-text"><span> Order Placed</span><span class="time-sub-text">Till Date</span></p>
+            <p class="day-text"> @ViewBag.totalorder</p>
+        </div>*@
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="modal fade" id="Orderstockmodel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Order Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <input type="date" id="txtdate" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <select id="txtvender" class="form-control">
+                                    <option value="0" selected>Select Vender</option>
+
+                                </select>
+                            </div>
+
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select id="txtcategory" class="form-control">
+                                    <option value="0" selected>Select Category</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="txtsubcategory" class="form-control">
+                                    <option value="0" selected>Select SubCategory</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="txtproduct" class="form-control">
+                                    <option value="0" selected>Select Product</option>
+                                </select>
+
+                            </div>
+
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="text" placeholder="Order Quantites" id="txtorderquantity" class="form-control" />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="button" class="btn btn-outline-primary form-control" id="btnadditems" value="+" />
+                            </div>
+                        </div>
+                        <br />
+
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <table class="table table-bordered">
+
+                                    <thead>
+
+                                        <tr>
+                                            <th>sr</th>
+                                            <th>Product Name</th>
+                                            <th>Product Quantity</th>
+                                            <th>Action</th>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody id="tblitems">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5">Final Total </td>
+                                            <td id="finaltotal"></td>
+
+                                        </tr>
+
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-danger form-control" id="btnadd">Order</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <h6><b>Order History</b></h6>
+        <br />
+        <input type="text" id="myInput" placeholder="Search Order History" class="form-control" />
+        <br />
+        <table class="table table-bordered table-hover table-responsive">
+            <thead>
+                <tr>
+                    <th>Sr.No</th>
+                    <th>Order To</th>
+                    <th>Order Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tblorderhistory"></tbody>
+        </table>
+
+    </div>
+    <div class="col-md-2">
+
+    </div>
+  
+</div>
+
+
+<div class="row">
+    <div class="modal fade" id="vieworderstock" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Order Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Order Date</h4>
+                            <input type="text" id="txtdate" disabled />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Vender Name</label>
+                            <input type="text" id="txtvendername" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span>Order History</span>
+                        <table class="table table-bordered table-primary">
+                            <thead>
+                                <tr>
+                                    <th>Sr.no</th>
+                                    <th>Product Name</th>
+                                    <th>Order Quantitites</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="txtorderproductitems"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="row">
+    <div class="col-md-6">
+        <tr>
+            <td><label>Start Date</label></td>
+            <td><input type="date"  id="startdate" /></td>
+        </tr>
+        <tr>
+            <td><label>End Date</label></td>
+            <td><input type="date" id="Enddate" /></td>
+        </tr>
+        <input type="button" class="btn btn-primary" id="btnviewrecod" value="Show"/>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#btnviewrecod").click(function () {
+            getdatewiserecod();
+        })
+
+        function getdatewiserecod() {
+
+            var sdate = $("#startdate").val();
+            var edate = $("#Enddate").val();
+            var st = { "startdate": sdate, "Enddate": edate };
+            console.log(st);
+            
+            $.ajax({
+                url: "/MaintainStock/getdatewisedata",
+                method: "Post",
+                data:st,
+                dataType: "application/json",
+                success: function (data) {
+
+                }
+            })
+        }
+
+    })
+</script>*@
+<h1></h1>

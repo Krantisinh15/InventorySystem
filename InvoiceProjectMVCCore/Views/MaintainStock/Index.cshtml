@@ -1,0 +1,83 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+<script>
+    $(document).ready(function(){
+        fetchavailableStock();
+      
+    })
+ 
+    function fetchavailableStock(){
+        $.ajax({
+            url: "/MaintainStock/AvailableStock",
+            method:"get",
+            contentType: "application/Json",
+            success: function (data) {
+                console.log(data);
+                $("#txtpid").empty();
+                $.each(data, function (i, d) {
+                  
+                    $("#txtpid").append("<tr><td>" + (i + 1) + "</td><td>" + d.product_name + "</td><td>" + d.recivedProduct_quantity + "</td><td>" + d.recivedProduct_Rate + "</td></tr>")
+                })
+            }
+        })
+    }
+   
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#txtpid tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+
+<h6>AVAILABLE STOCK</h6>
+<br />
+<br />
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <input type="text" id="myInput" placeholder="Search product" class="form-control" />
+
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+
+    </div>
+    <div class="card-body">
+        <div>
+            <table class="table table-bordered table-hover table-responsive table-light">
+                <thead>
+                    <tr>
+                        <th>Sr.no</th>
+                        <th>Product Name</th>
+                        <th>Available Quantities</th>
+                        <th>Recived At Price</th>
+                    </tr>
+                </thead>
+                <tbody id="txtpid">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4"></div>
+    <div class="col-md-4"></div>
+</div>
+<br />
+ 
+

@@ -1,0 +1,348 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+<link href="~/css/Dashboard.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" />
+
+<script>
+    $(document).ready(function(){
+        GetInvoicedetails();
+        fetchavailableStock();
+    })
+  function gotocustomer(){
+        
+        window.location.href = '/Customer/CustomerInfo';
+  }
+  function gotproducts(){
+        window.location.href = '/Product/GetallProducts';
+  }
+    function gotoavailablestock(){
+        window.location.href='/MaintainStock/Index';
+    }
+
+   function GetInvoicedetails(){
+        $.ajax({
+            url: "/Invoice/GetallInvoices",
+            type: "get",
+            contentType: "application/Json",
+            success: function (data) {
+
+                $.each(data, function (i, d) {
+
+                    $("#txtbody").append("<tr><td>" + (i + 1) + "</td><td>" + d.customer_name + "</td><td>" + d.invoice_date + "</td><td>" + d.total_Amount + "</td><td>" + d.paid_Amount + "</td><td>" + d.remaining_amount + "</td><td>" + d.status + "</td></tr>")
+                })
+
+             // console.log(data);
+                var TotalSale=data.reduce((i,d)=>{
+                    return i + d.total_Amount;
+                },0);
+                
+                $("#totalSale").text(TotalSale );
+
+                var TotalReceived = data.reduce((i, d) => {
+                    return i + d.paid_Amount;
+                }, 0);
+                $("#totalReceived").text(TotalReceived);
+
+                var TotalCredit = data.reduce((i, d) => {
+                    return i + d.remaining_amount;
+                }, 0);
+                
+                $("#totalCredit").text(TotalCredit);
+            }
+
+        })
+   }
+    function fetchavailableStock() {
+        $.ajax({
+            url: "/MaintainStock/AvailableStock",
+            method: "get",
+            contentType: "application/Json",
+            success: function (data) {
+
+               $.each(data,function(i,d){
+                    if (d.recivedProduct_quantity <= 10) {
+                        $("#tblstock").append("<tr><td>" + d.product_name + "</td><td class='txtcolor' style='color:#ff7782'>" + d.recivedProduct_quantity + "</td></tr>");
+                        //$("#stockqty").append("<span>" + d.recivedProduct_quantity + "</span>");
+                    }
+               })
+                console.log(data);
+                var TotalStockRs = data.reduce((i, d) => {
+                    return i + d.recivedProduct_Rate * d.recivedProduct_quantity;
+                }, 0);
+                $("#stockrs").text(TotalStockRs);
+
+                var TotalStockQuantity = data.reduce((i, d) => {
+                    return i +d.recivedProduct_quantity;
+                }, 0);
+                $("#availablestockrsQuantity").text(TotalStockQuantity);
+
+            }
+        })
+    }
+</script>
+<br />
+@*<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card" onclick="gotocustomer()">
+            <div class="card-header">Total Customers</div>
+            <div class="card-body bg-gradient">
+                @ViewBag.totalcustomer
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" onclick="gotproducts()">
+            <div class="card-header">Total Products</div>
+            <div class="card-body bg-gradient">
+                @ViewBag.productcount
+            </div>
+    </div>
+    <div class="col-md-4">
+         
+</div>
+
+
+<div class="row mb-3">
+    <div class="col-md-4"></div>
+    <div class="col-md-4"></div>
+    <div class="col-md-4"></div>
+</div>
+      
+*@
+@*  </div>*@
+
+
+@*<div class="row">
+    <div class="col-md-4">
+        <div class="card" onclick="gotocustomer()">
+            <div class="card-details">
+                <p class="text-title">Total Customer</p>
+                <p class="text-title"> @ViewBag.totalcustomer</p>
+            </div>
+            <button class="card-button">More info</button>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" onclick="gotproducts()">
+            <div class="card-details">
+                <p class="text-title">Total Products</p>
+                <p class="text-title"> @ViewBag.productcount</p>
+            </div>
+            <button class="card-button">More info</button>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card" onclick="gotoavailablestock()">
+            <div class="card-details">
+                <p class="text-title"> See Available Products</p>
+                <p class="text-title"></p>
+            </div>
+            <button class="card-button">More info</button>
+        </div>
+    </div>
+</div>
+
+*@
+<div class="row">
+    <div class="col-md-9">
+        <main>
+            <h1>Dashboard</h1>
+            <div class="date">
+                <input type="date" />
+            </div>
+
+            <div class="insights">
+                <div class="sales">
+                    <span class="material-symbols-sharp"> bar_chart_4_bars</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Total Sells</h3>
+                            <h1 id="totalSale"></h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="number">
+                                <p>81%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Last 24 hours</small>
+                </div>
+
+                <div class="Expenses">
+                    <span class="material-symbols-sharp">currency_rupee </span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Total Income</h3> 
+                            <h1 id="totalReceived"></h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="number">
+                                <p>50%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Last 24 hours</small>
+                </div>
+
+                <div class="remainingamount">
+                    <span class="material-symbols-sharp">inventory_2 </span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>You Will Received Amount</h3>
+                            <h1 id="totalCredit"></h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx="38" cy="38" r="36"></circle>
+                            </svg>
+                            <div class="number">
+                                <p>50%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Last 24 hours</small>
+                </div>
+            </div>
+
+            <div class="recent-order">
+                <h2>Recent Orders</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sr.No</th>
+                            <th>Customer Name</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Paid Amount</th>
+                            <th>Remaining Amount</th>
+                            <th>Status</th>
+                          
+
+                        </tr>
+                    </thead>
+                    <tbody id="txtbody"></tbody>
+                </table>
+            </div>
+
+
+
+        </main>
+
+
+    </div>
+    <div class="col-md-3">
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-symbols-sharp"> menu</span>
+                </button>
+                <div class="them-toggle">
+                    <span class="material-symbols-sharp active"> light_mode</span>
+                    <span class="material-symbols-sharp"> dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey,<b>Shrikant</b></p>
+                        <small class="text-muted">Admin</small>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="recent-updates">
+                <h2>Recent Update</h2>
+                <div class="updates">
+                    <div class="update">
+                        <div class="profile-photo">
+                        </div>
+                        <div class="message">
+                            <p><b>Mike</b> recive his order</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="sales-analytics">
+                <h2>Sales Analystics</h2>
+                <div class="item online">
+                    <div class="icon">
+                        <span class="material-symbols-sharp"> shopping_cart</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Orders</h3>
+                            <small class="text-muted">Last 24 hours</small>
+                        </div>
+                        <h5 class="success">+39%</h5>
+                        <h3>380</h3>
+                    </div>
+                </div>
+
+
+
+                <div class="item online">
+                    <div class="icon">
+                        <span class="material-symbols-sharp"> shopping_cart</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3> Available Quantity</h3>
+                            <small class="text-muted">Last 24 hours</small>
+                        </div>
+                        <h2 class="success" id="availablestockrsQuantity"></h2>
+                        
+                    </div>
+                </div>
+
+
+
+                <div class="item online">
+                    <div class="icon">
+                        <span class="material-symbols-sharp"> shopping_cart</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Stock Value</h3>
+                            <small class="text-muted">Last 24 hours</small>
+                        </div>
+                        <h2 class="success" id="stockrs"></h2>
+                       
+                    </div>
+                </div>
+
+
+                <div class="item online">
+                    
+                    <div class="right" >
+                        <div class="info" style="align-items:center">
+                            <h2>Low Stocks</h2>
+                            <table style="text-align:center">
+                                <thead id="tblstock"></thead>
+
+                           </table>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
+

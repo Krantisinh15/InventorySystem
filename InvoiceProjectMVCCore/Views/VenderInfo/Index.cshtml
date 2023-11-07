@@ -1,0 +1,183 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+<script>
+    $(document).ready(function(){
+        Fetchvenders();
+
+        $("#btnadd").click(function(){
+            Addvender();
+        })
+    })
+    function Fetchvenders(){
+        $.ajax({
+            url: "/VenderInfo/Getvenders",
+            method:"Get",
+            contentType:"application/json",
+            success:function(data){
+                console.log(data);
+                $("txtvender").empty();
+               
+                //$.each(data, function (i, d) {
+
+                //    $("#txtvender").append("<tr><td>" + (i + 1) + "</td><td>" + d.vender_name + "</td><td>" + d.mobile_no + "</td><td>" + d.email_address + "</td></tr>")
+                //})
+                $.each(data, function (i, d) {
+
+                    $("#txtvender").append(
+                        "<tr>" +
+                        "<td>" + (i + 1) + "</td>" +
+                        "<td id='name_" + d.vender_id + "' contenteditable='false'>" + d.vender_name + "</td>" +
+                        "<td id='mobile" + d.vender_id + "' contenteditable='false'>" + d.mobile_no + "</td>" +
+                        "<td id='email_" + d.vender_id + "' contenteditable='false'>" + d.email_address + "</td>" +
+                        "<td>" +
+
+                        "<button id='edit_" + d.vender_id + "'onclick='Edit(" + d.vender_id + ")' class='btn btn-outline-primary'><i class= 'bi bi-pencil' > </i></button > &nbsp;" +
+                        "<button id='delete" + d.vender_id + "'onclick='Delete(" + d.vender_id + ")' class='btn btn-outline-danger'><i class='bi bi-x-octagon-fill'></i></button>" +
+                        "<button id='save_" + d.vender_id + "' style='display: none;' onclick='Save(" + d.vender_id + ")' class='btn btn-outline-success'>Update</button>  &nbsp;" +
+                        "<button id='cancel" + d.vender_id + "' style='display: none;''onclick='Cancel(" + d.vender_id + ")' class='btn btn-outline-danger'>Cancel</button>" +
+
+                        "</td>" +
+                        "</tr>"
+                    );
+                });
+
+
+
+            }
+        })
+    }
+
+    function Edit(id) {
+
+        $("#name_" + id).attr("contenteditable", "true").focus();
+        $("#mobile" + id).attr("contenteditable", "true");
+        $("#email_" + id).attr("contenteditable", "true");
+        
+
+        $("#edit_" + id).hide();
+        $("#delete" + id).hide();
+        $("#save_" + id).show();
+        $("#cancel" + id).show();
+    }
+
+    function Save(id) {
+        var name = $("#name_" + id).text();
+        var email = $("#email_" + id).text();
+        var mob = $("#mobile" + id).text();
+        $.ajax({
+            type: "POST",
+            url: "/VenderInfo/Updatevender",
+            data: { VenderId: id, VenderName: name, MobileNo: mob, EmailAddress: email,},
+            dataType: "json",
+            cache: false,
+            success: function (resp) {
+                $("#save_" + id).hide();
+                $("#edit_" + id).show();
+                Fetchvenders();
+            }
+        });
+    }
+    function Delete(id) {
+        var a = window.confirm("Do you want Delete");
+        if (a == true) {
+            $.ajax({
+                url: "/VenderInfo/Deletevender/" + id,
+                type: "get",
+                contentType: "application/Json",
+                dataType: "json",
+                success: function (resp) {
+                    Fetchvenders();
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+    function Addvender(){
+        var vname=$("#txtname").val();
+        var ema=$("#txtemail").val();
+        var mob=$("#txtmobile").val();
+
+        var st = { "VenderName": vname, "EmailAddress": ema, "MobileNo":mob}
+        console.log(st);
+        $.ajax({
+            url: "/VenderInfo/Addvenderss",
+            method:"Post",
+            data:st,
+            dataType: "application/json",
+            success: function (resp) {
+                alert("Vender Added Sucessfully");
+                Fetchvenders();
+
+            }
+            })
+
+    }
+
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#txtvender tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+<br />
+<input type="text" id="myInput" placeholder="Search Vender" class="form-control" />
+<br />
+<table class="table table-bordered table-success table-striped">
+    <thead>
+        <tr>
+            <th>Sr.No</th>
+            <th>Vender Name</th>
+            <th>Mobile Number</th>
+            <th>Email Address</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="txtvender"></tbody>
+</table>
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <input type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#Vendermodel" value="Add Vender" />
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+
+<div class="row">
+    <div class="modal fade" id="Vendermodel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Recive Products</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                     
+                     <input type="text" id="txtname" class="form-control" placeholder="Enter Vender Name" />
+                    <br />
+                  <input type="text" id="txtemail" class="form-control" placeholder="Enter Email Address" />
+                    <br />
+                         <input type="text" id="txtmobile" class="form-control" placeholder="Enter Mobile Number" />
+                         <br />
+                    <button type="button" id="btnadd" class="btn btn-outline-warning form-control" data-bs-dismiss="modal" >Add Vender</button>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

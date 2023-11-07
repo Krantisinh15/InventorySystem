@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#tblcustomers tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+
+
+<br />
+<br />
+<div>
+  @*<button class="btn btn-success" id="btnAdd"> <span>+</span>Add Customer</button>*@
+
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4" >
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <label>Customer Name</label>
+                        <input type="text" id="txtcname" class="form-control" />
+                    </div>
+                    <div>
+                        <label>Mobile Number</label>
+                        <input type="text" id="txtmobile" class="form-control" />
+                    </div>
+                    <div>
+                        <label>Email Address</label>
+                        <input type="text" id="txtemail" class="form-control" />
+                    </div>
+                    @*  <div>
+                    <label>Select State</label>
+                    <select id="txtstate" class="form-control">
+                    <option>Select State</option>
+                    </select>
+                    </div>
+                    <div>
+                    <label>Select City</label>
+                    <select id="txtcity" class="form-control">
+                    <option>Select City</option>
+                    </select>
+                    </div>*@
+                    <div>
+                        <label>Select Location</label>
+                        <select id="txtlocation" class="form-control">
+                            <option value="0" selected>Select Location</option>
+                        </select>
+                    </div>
+                    <div>
+
+                        <input type="button" id="btnsubmit" value="Add Customer" class="btn btn-outline-warning m-2" />
+                        <input type="button" id="btncancel" value="Cancel" class="btn btn-outline-success" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+ 
+ 
+
+</div>
+

@@ -1,0 +1,446 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+<style>
+    autocomplete {
+        font-size: 18px;
+        padding: 5px;
+        height: 35px;
+        width: 350px;
+        border: 1px solid #000;
+        outline: none;
+        border-radius: 5px;
+        color: #000;
+        /*   border-bottom: none; */
+    }
+
+    datalist {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #000;
+        border-radius: 0 0 5px 5px;
+        border-top: none;
+        width: 350px;
+        padding: 5px;
+    }
+
+    option {
+        background-color: white;
+        padding: 4px;
+        color: #000;
+        margin-bottom: 1px;
+        font-size: 18px;
+        cursor: pointer;
+        background: #eeeeee
+    }
+
+        option:hover,
+        .active {
+            background-color: red;
+        }
+
+    .dropdown-toggle::after {
+        content: none;
+    }
+</style>
+
+
+<script>
+
+    $(document).ready(function () {
+        //fetchcustomer();
+        fetchCategories();
+        fetchSubCategories();
+        fetchproducts();
+        $("#txtcategory").change(function () {
+            fetchSubCategories();
+        })
+        $("#txtsubcategory").change(function () {
+            fetchproducts();
+        })
+        $("#txtproduct").change(function () {
+            fetchquantities();
+        })
+        $("#txtpurchasequantity").change(function () {
+            calculateTotal();
+        })
+
+        $("#btnadditems").click(function () {
+            AddItems();
+        })
+
+        $("#Generate").click(function(){
+            generateinvoice();
+        })
+       
+    })
+
+    //function fetchcustomer() {
+    //    $.ajax({
+    //        url: "/Invoice/GetCustomers",
+    //        method: "get",
+    //        contentType: "application/Json",
+    //        success: function (customer) {
+    //            $.each(customer, function (i, d) {
+    //                $("#txtcustomer").append("<option value=" + d.value + ">" + d.text + "</option>")
+    //            })
+    //        }
+
+    //    })
+    //}
+    function fetchCategories() {
+
+        $.ajax({
+            url: "/Invoice/GetCategories",
+            method: "get",
+            contentType: "application/Json",
+            success: function (categories) {
+                $.each(categories, function (i, d) {
+                    cui = d.user_id;
+                    $("#txtcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+
+    function fetchSubCategories() {
+        var cid = $("#txtcategory").val();
+        $.ajax({
+            url: "/Invoice/GetSubCategoriebyid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (subcategories) {
+                $.each(subcategories, function (i, d) {
+                    $("#txtsubcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+
+    function fetchproducts() {
+        var cid = $("#txtsubcategory").val();
+        $.ajax({
+            url: "/Invoice/GetProductbysubcategoryid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (products) {
+
+                $.each(products, function (i, d) {
+                    $("#txtproduct").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    var pname = "";
+    function fetchquantities() {
+        var pid = $("#txtproduct").val();
+        alert(pid);
+        $.ajax({
+            url: "/Invoice/GetProductdetailsbyid/" + pid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (product) {
+              console.log(product);
+               pname=product.product_name;
+                $("#txtSellingquantity").val(product.selling_rate);
+                $("#txttax").val(product.tax);
+                $("#txtAvailablestock").val(product.recivedProduct_quantity)
+
+            }
+
+
+        })
+    }
+
+
+    function calculateTotal() {
+        var pq = Number($("#txtpurchasequantity").val());
+        var selrate = Number($("#txtSellingquantity").val());
+        var tax = Number($("#txttax").val());
+         var total = (selrate + (selrate * tax) / 100) * pq;;
+
+        $("#txttotal").val(total);
+
+    }
+
+    var data = [];
+    function AddItems() {
+
+        var custid = $("#autocomplete-dropdown").val()
+        alert(custid);
+        var date = $("#txtdate").val()
+        var cat = $("#txtcategory").val()
+        var scat = $("#txtsubcategory").val()
+        var pro = $("#txtproduct").val()
+        var un = $("#txtunit").val()
+        var tx = $("#txttax").val()
+        var pq = $("#txtpurchasequantity").val()
+        var sr = $("#txtSellingquantity").val()
+        var total = $("#txttotal").val()
+        var st = { "ProductId": pro, product_name: pname, "PurchaseQuantity": pq, Tax: tx, selling_rate: sr, Total_amount: total };
+
+        data.push(st);
+
+        Fetchitems();
+    }
+    var ftotal=0;
+    function Fetchitems() {
+        $("#tblitems").empty();
+        ftotal = 0
+        $.each(data, function (i, d) {
+             ftotal += Number(d.Total_amount);
+            $("#tblitems").append("<tr><td>" + i + "</td><td>" + d.product_name + "</td><td>" + d.selling_rate + "</td><td>" + d.PurchaseQuantity + "</td><td>" + d.Total_amount + "</td><td><input type='button' value='Edit'onclick='EditItem(" + i + ")'/><input type='button' value='Delete'onclick='DeleteItem(" + i + ")'/></td></tr>");
+           
+        })
+        $("#finaltotal").html(ftotal);
+    }
+    function EditItem(id) {
+        alert(id);
+    }
+    function DeleteItem(id) {
+        data.splice(id, 1);
+        Fetchitems();
+    }
+
+    function generateinvoice() {
+        let idate = $("#txtdate").val();
+        let CustId = Number($("#txtcustomer").val());
+        var st = { "CustomerId": CustId, "TotalAmount": ftotal, "InvoiceDate": idate, "TblinvoiceProducts": data }
+        console.log(st);
+        $.ajax({
+            type: "POST",
+            url: "/Invoice/CustInvoice",
+            data:st,
+            dataType: "application/json",
+            success: function (resp) {
+                alert("Your Bill Is Generated");
+                console.log(resp)
+                FetchCustomerInvoice();
+            }
+        })
+       
+    }
+
+
+</script>
+
+<style>
+    /* Add your custom CSS styles here */
+    .autocomplete {
+        position: relative;
+        display: inline-block;
+    }
+
+    .autocomplete-input {
+        width: 300px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .autocomplete-dropdown {
+        position: absolute;
+        width: 300px;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        z-index: 1;
+    }
+
+        .autocomplete-dropdown .option {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            .autocomplete-dropdown .option:hover {
+                background-color: #f1f1f1;
+            }
+</style>
+<script>
+    $(document).ready(function () {
+        fetchcustomer();
+       var CustomerData=null;
+        function fetchcustomer() {
+          
+            $.ajax({
+                url: "/Invoice/GetCustomers",
+                method: "get",
+                contentType: "application/Json",
+                success: function (customer) {
+
+                    CustomerData = customer;
+                    console.log(CustomerData);
+                    //    $.each(customer, function (i, d) {
+                    //        $("#txtcustomer").append("<option value=" + d.value + ">" + d.text + "</option>")
+                    //    })
+                }
+
+            })
+        }
+
+        $("#autocomplete").on("input", function () {
+            const inputText = $(this).val().toLowerCase();
+            filterOptions(inputText);
+        });
+
+        function filterOptions(inputText) {
+            const options = $("#autocomplete-dropdown .option");
+            options.each(function () {
+                const optionText = $(this).text().toLowerCase();
+                if (optionText.includes(inputText)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        function displayOptions() {
+            alert();
+            $("#autocomplete-dropdown").empty();
+            $.each(CustomerData,function (i,d) {
+             console.log(d);
+                $("#autocomplete-dropdown").append("<div class='option' value='"+d.value+"'>" + d.text + "</div>");
+            });
+            $(".option").on("click", function () {
+                $("#autocomplete").val($(this).text());
+                $("#autocomplete-dropdown").hide();
+            });
+        }
+
+        $("#autocomplete").on("click", function (e) {
+            const dropdown = $("#autocomplete-dropdown");
+            if (dropdown.is(":hidden")) {
+                displayOptions();
+                dropdown.show();
+            } else {
+                dropdown.hide();
+            }
+            e.stopPropagation();
+        });
+
+        $(document).on("click", function (e) {
+            if (!$(e.target).closest("#autocomplete").length) {
+                $("#autocomplete-dropdown").hide();
+            }
+        });
+    });
+</script>
+<br />
+<div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    @* <select id="txtcustomer" class="form-control">
+                    <option value="0" selected>Select Customer</option>
+
+                    </select>*@
+                    <div class="autocomplete">
+                        <input type="text" id="autocomplete" class="form-control autocomplete-input" style="width:100%" placeholder="Select Customer" />
+
+                        <div id="autocomplete-dropdown" class="autocomplete-dropdown"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input type="date" id="txtdate" class="form-control" />
+                </div>
+                @*   <div class="col-md-4">
+                <input type="text" id="txttotalamount" class="form-control" placeholder="Total Amount purchase" disabled />
+                </div>*@
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3">
+                    <select id="txtcategory" class="form-control">
+                        <option value="0" selected>Select Category</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="txtsubcategory" class="form-control">
+                        <option value="0" selected>Select SubCategory</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="txtproduct" class="form-control">
+                        <option value="0" selected>Select Product</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="txtAvailablestock" placeholder="Availabe Stock" disabled />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Purchase Quantity" id="txtpurchasequantity" />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Selling Rate" id="txtSellingquantity" disabled />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Tax" id="txttax" disabled />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Total " id="txttotal" disabled />
+                </div>
+
+                <div class="col-md-3">
+                    <input type="button" class="btn btn-outline-primary" id="btnadditems" value="+ Items" />
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <table class="table table-bordered">
+
+                        <thead>
+
+                            <tr>
+                                <th>sr</th>
+                                <th>Product Name</th>
+                                <th>Product Rate</th>
+                                <th>Product Quantity</th>
+                                <th>Total Amount</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="tblitems">
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5">Final Total </td>
+                                <td id="finaltotal"></td>
+
+                            </tr>
+
+                        </tfoot>
+                    </table>
+                    <input type="button" class="btn btn-primary" value="Generate Invoice" id="Generate" />
+                </div>
+            </div>
+        </div>
+    </div>
+  
+</div>
+
+
+<hr />
+
+
+
+
+
+
+
+
+

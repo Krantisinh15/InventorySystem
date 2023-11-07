@@ -1,0 +1,124 @@
+﻿
+@{
+    ViewData["Title"] = "GetcustomerHistory";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+
+<script>
+    $(document).ready(function(){
+        fetchCustomers();
+    })
+  
+        function fetchCustomers() {
+            $.ajax({
+                url: "/Customer/GetAllCustomers",
+                method: "Get",
+                contentType: "application/Json",
+                success: function (data) {
+                    console.log(data);
+                    $("#txtcust").empty();
+                    $.each(data, function (i, d) {
+
+                    $("#txtcust").append("<tr><td>" + (i + 1) + "</td><td>" + d.customer_name + "</td><td>" + d.mobile_No + "</td><td><button id='btnedit' class='btn btn-outline-primary' onclick='viewCustomer(" + d.customer_id + ")'><i class='bi bi-box-arrow-up-right'></i></button> </td></tr > ")
+                    })
+                }
+            })
+
+        }
+    function viewCustomer(id){
+        window.location.href = "/Customer/GetcustomerinvoiceHistory/" + id;
+
+        //$.ajax({
+
+        //    url:"/Invoice/GetAllInvoiceProductbycustomerid/" + id,
+        //    method:"Get",
+        //    contentType:"application/json",
+        //    success:function(data){
+        //        console.log(data);
+        //        window.location.href = "/Customer/GetcustomerinvoiceHistory/" 
+                //console.log(data);
+                //$("#txtcusinvoice").empty();
+                //$("#txtcustomername").val(data[0].customer_name);
+                //$("#txtcustomermobile").val(data[0].customer_mobile_no);
+                //$.each(data,function(i,d){
+
+                //    $("#txtcusinvoice").append("<tr><td>" + (i + 1) + "</td><td>" + d.invoice_id + "</td><td>" + d.invoice_date + "</td><td>" + d.total_Amount + "</td></tr>")
+                //})
+        //    }
+            
+        //})
+    }
+    
+</script>
+
+
+
+<br />
+
+
+<br />
+<div class="row">
+   
+    <div class="col-md-6">
+        <input type="text" placeholder="Search customer for there history" class="form-control" />
+        <br />
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Sr.no</th>
+                    <th>Customer Name</th>
+                    <th>Mobile Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="txtcust"></tbody>
+        </table>
+    </div>
+    <div class="col-md-6"></div>
+</div>
+
+<div class="row">
+    <div class="modal fade" id="Orderstockmodel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"> Purchase History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="txtcustomername" class="form-control" disabled/>
+                        </div>
+                            <div class="col-md-6">
+                                <input type="text" id="txtcustomermobile" class="form-control" disabled />
+
+                            </div>
+                    </div>
+                    <hr />
+                      <div class="row">
+                          <div class="col-md-12">
+                              <table class="table table-bordered table-info">
+                                  <thead>
+                                      <tr>
+                                          <th>Sr.no</th>
+                                          <th>Invoice ID</th>
+                                          <th>Purchase Date</th>
+                                          <th>Total Purchase Amount</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody id="txtcusinvoice"></tbody>
+                              </table>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

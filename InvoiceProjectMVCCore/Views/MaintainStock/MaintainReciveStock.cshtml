@@ -1,0 +1,296 @@
+﻿
+@{
+    ViewData["Title"] = "MaintainReciveStock";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+        fetchrecivecategories();
+        fetchreciveVenders();
+        getrecivedetails();
+        $("#txtrecivecategory").change(function () {
+            fetchreciveSubCategories();
+        })
+        $("#txtrecivesubcategory").change(function () {
+            fetchreciveproducts();
+        })
+        $("#btnadditemss").click(function () {
+            Addproducts();
+        })
+        $("#btnreciveorder").click(function () {
+            Recivestock();
+        })
+    })
+    function getrecivedetails() {
+        $.ajax({
+            url: "/MaintainStock/Getreciveorder",
+            method: "Get",
+            methodType: "application/json",
+            success: function (data) {
+                console.log(data);
+                $.each(data, function (i, d) {
+                    $("#txtreciveorder").append("<tr><td>" + (i + 1) + "</td><td>" + d.recived_date + "</td><td>" + d.vendor_name + "</td><td><button id='btnedit' class='btn btn-outline-primary' onclick='getreciveorderdetails(" + d.recivedStock_id + ")'><i class='bi bi-eye-fill'></i></button></td></tr>")
+                })
+            }
+
+        })
+    }
+    function getreciveorderdetails(id) {
+        alert(id);
+    }
+    function fetchreciveVenders() {
+        $.ajax({
+            url: "/MaintainStock/Getvenders",
+            method: "get",
+            contentType: "application/Json",
+            success: function (vender) {
+                $.each(vender, function (i, d) {
+                    $("#txtrecivevender").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    function fetchrecivecategories() {
+
+        $.ajax({
+            url: "/MaintainStock/GetCategories",
+            method: "get",
+            contentType: "application/Json",
+            success: function (categories) {
+                $.each(categories, function (i, d) {
+                    cui = d.user_id;
+                    $("#txtrecivecategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+
+    }
+    function fetchreciveSubCategories() {
+        var cid = $("#txtrecivecategory").val();
+        $.ajax({
+            url: "/MaintainStock/GetSubCategoriebyid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (subcategories) {
+                $.each(subcategories, function (i, d) {
+                    $("#txtrecivesubcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    var pname = "";
+    function fetchreciveproducts() {
+        var cid = $("#txtrecivesubcategory").val();
+        $.ajax({
+            url: "/MaintainStock/GetProductbysubcategoryid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (products) {
+
+                $.each(products, function (i, d) {
+                    pname = d.text;
+                    $("#txtreciveproduct").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    var data = [];
+    function Addproducts() {
+        var pid = $("#txtreciveproduct").val();
+        var q = $("#txtrecivequantity").val();
+        var reciverate = $("#txtrate").val();
+        var st = { "ProductId": pid, "RecivedProductQuantity": q, "RecivedProductRate": reciverate, product_name: pname };
+        console.log(st);
+        data.push(st);
+        Fetchreciveitems();
+    }
+    var ftotal = 0;
+    function Fetchreciveitems() {
+        $("#tblreciveitems").empty();
+        ftotal = 0
+        $.each(data, function (i, d) {
+            console.log(data);
+            ftotal += Number(d.RecivedProductQuantity);
+            $("#tblreciveitems").append("<tr><td>" + i + "</td><td>" + d.product_name + "</td><td>" + d.RecivedProductQuantity + "</td><td>" + d.RecivedProductRate + "</td><td><input type='button' value='Delete'onclick='DeleteItem(" + i + ")'/></td></tr>");
+
+        })
+        $("#finalrecivetotal").html(ftotal);
+    }
+    function DeleteItem(id) {
+        data.splice(id, 1);
+        Fetchitems();
+    }
+    function Recivestock() {
+
+        var date = $("#txtrecivedate").val();
+        var venid = $("#txtrecivevender").val();
+        var st = { "RecivedDate": date, "VenderId": venid, "TblrecivedStockProducts": data };
+        console.log(st);
+        $.ajax({
+            url: "/MaintainStock/ReciveStock",
+            method: "Post",
+            data: st,
+            dataType: "application/json",
+            success: function (resp) {
+                alert("Your Order Is Recived");
+                console.log(JSON.stringify(resp))
+                fetchavailableStock();
+            }
+        })
+
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            //var value = $("#txtreciveorder").val().toUpperCase();
+
+            $("#txtreciveorder tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+<br />
+<input type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#RecivestockModel" value="Recive Stock" id="txtorderstock" />
+
+
+<div class="row">
+   
+
+    <div class="modal fade" id="RecivestockModel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Recive Products</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <input type="date" id="txtrecivedate" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <select id="txtrecivevender" class="form-control">
+                                    <option value="0" selected>Select Vender</option>
+
+                                </select>
+                            </div>
+
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select id="txtrecivecategory" class="form-control">
+                                    <option value="0" selected>Select Category</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="txtrecivesubcategory" class="form-control">
+                                    <option value="0" selected>Select SubCategory</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="txtreciveproduct" class="form-control">
+                                    <option value="0" selected>Select Product</option>
+                                </select>
+
+                            </div>
+
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" placeholder="Recived Quantites" id="txtrecivequantity" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" placeholder="Rate" id="txtrate" class="form-control" />
+
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="button" class="btn btn-outline-primary form-control" id="btnadditemss" value="+" />
+                            </div>
+                        </div>
+                        <br />
+
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <table class="table table-bordered">
+
+                                    <thead>
+
+                                        <tr>
+                                            <th>sr</th>
+                                            <th>Product Name</th>
+                                            <th>Recived Quantity</th>
+                                            <th>Rate</th>
+                                            <th>Action</th>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody id="tblreciveitems">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5">Final Recive Quantites </td>
+                                            <td id="finalrecivetotal"></td>
+
+                                        </tr>
+
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <br />
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-danger form-control" id="btnreciveorder">Recive Stock</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-5">
+    <h6><b>Recive History</b></h6>
+    <br />
+    <input type="text" id="myInput" placeholder="Search Recive History" class="form-control" />
+    <br />
+    <table class="table table-bordered table-hover ">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Recive Date</th>
+                <th>Recived From</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="txtreciveorder"></tbody>
+    </table>
+
+</div>
+
+  

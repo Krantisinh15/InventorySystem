@@ -1,0 +1,53 @@
+﻿body {
+}
+.card {
+    width: 264px;
+    height: 154px;
+    background: rgb(17, 4, 134);
+    border-radius: 15px;
+    display: flex;
+    color: white;
+    justify-content: center;
+    position: absolute;
+    flex-direction: column;
+    background: linear-gradient(lightsteelblue,white);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+   
+
+.time-text {
+    font-size: 27px;
+    margin-top: 0px;
+    margin-left: 15px;
+    font-weight: 600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.time-sub-text {
+    font-size: 15px;
+    margin-left: 5px;
+}
+
+.day-text {
+    font-size: 31px;
+    margin-top: 0px;
+    margin-left: 125px;
+    font-weight: 500;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.moon {
+    font-size: 20px;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover > .moon {
+    font-size: 23px;
+}
+

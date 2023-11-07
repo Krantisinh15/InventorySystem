@@ -1,0 +1,317 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor Accessor
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<!-- jQuery library -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- jQuery UI library -->
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
+
+
+
+<script>
+    
+   
+
+ $(document).ready(function(){
+
+        
+      // alert(userId);
+      
+        fetchCategories();
+        fetchSubCategories();
+        fetchUnits();
+        fetchproductsbysubcategoryID();
+        $("#btnAddCategory").click(function(){
+            AddCategory();
+        })
+        $("#txtcategory").change(function () {
+            fetchSubCategories();
+        })
+        $("#btnAddSubCategory").click(function(){
+            AddSubCategories();
+        })
+        $("#txtsubcategory").change(function(){
+            fetchproductsbysubcategoryID();
+        })
+        $("#btnAddProduct").click(function(){
+            Addproducts();
+        })
+ })
+   
+   // var userid = ""
+    function AddCategory(){
+        var cname = $("#txtcat").val();
+              $.ajax({
+            type:"POST",
+            url: '/Product/Addcategorybyuser',
+            data: { Category: cname, },
+            dataType: "json",
+            cache: false,
+            success: function (resp) {
+                alert(resp);
+                        
+                console.log(resp);
+            }
+
+        })
+    }
+    var cui=""
+    function fetchCategories() {
+
+        $.ajax({
+            url: "/Product/GetCategories",
+            method: "get",
+            contentType: "application/Json",
+            success: function (categories) {
+                $.each(categories, function (i, d) {
+                    cui = d.user_id;
+                    
+                    $("#txtcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+         
+              }
+        });
+    }
+
+  
+    function fetchSubCategories() {
+        var cid = $("#txtcategory").val();
+        $.ajax({
+            url: "/Product/GetSubCategoriebyid/" + cid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (subcategories) {
+                $.each(subcategories, function (i, d) {
+                    $("#txtsubcategory").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    
+    function AddSubCategories() {
+        var cid = $("#txtcategory").val();
+        var sname = $("#txtsubcat").val();
+        $.ajax({
+            type: "POST",
+            url: '/Product/AddSubcategorybyuser',
+            data: { CategoryId: cid, Subcategory: sname,},
+            dataType: "json",
+            cache: false,
+            success: function (resp) {
+                alert(JSON.stringify( resp));
+                console.log(resp);
+            }
+
+        })
+    }
+
+    function fetchproductsbysubcategoryID() {
+        var subcid = $("#txtsubcategory").val();
+        $.ajax({
+            url: "/Product/GetProductsbysubcategoryid/" + subcid,
+            method: "get",
+            contentType: "application/Json",
+            success: function (product) {
+                $.each(product, function (i, d) {
+                    $("#txtproduct").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+
+        })
+    }
+    function fetchUnits() {
+        $.ajax({
+            url: "/Product/GetUnits",
+            method: "Get",
+            contentType: "application/Json",
+            success: function (units) {
+                $.each(units, function (i, d) {
+                    $("#txtUnit").append("<option value=" + d.value + ">" + d.text + "</option>")
+                })
+            }
+        })
+
+    }
+    function Addproducts(){
+        var subcid = $("#txtsubcategory").val();
+        var pname = $("#txtprod").val();
+        var srate = $("#txtsellingrate").val();
+        var ta=$("#txttax").val();
+        var uid = $("#txtUnit").val();
+       
+        $.ajax({
+            type: "POST",
+            url: '/Product/AddSubProduct',
+            data: { SubcategoryId: subcid, ProductName: pname, UserId: @ViewBag.UserData.User_id, UnitId: uid, Tax: ta, SellingRate: srate },
+            dataType: "json",
+            cache: false,
+            success: function (resp) {
+                alert(JSON.stringify(resp));
+                console.log(resp);
+            }
+
+        })
+    }
+  
+</script>
+
+
+
+<div>
+    <br />
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <label>Select Category</label>
+                            <select id="txtcategory" class="form-control">
+                                <option value="0" selected>Select Category</option>
+                            </select>
+
+                        </div>
+                        <div class="col-md-3">
+                            <br />
+                            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#viewcategory" >AddCategory</button>
+                        </div>
+                       
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-9">
+                            <label>Select SubCategory</label>
+                            <select id="txtsubcategory" class="form-control">
+                                <option value="0" selected>Select SubCategory</option>
+
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <br />
+                            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#viewsubcategory" >AddSubcategory</button>
+                        </div>
+                    </div>
+    
+                    <br />
+                    @* <div>
+                    <label>Select Product</label>
+                    <select id="txtproduct" class="form-control">
+                    <option value="0" selected>Select Product</option>
+
+                    </select>
+                    </div>*@
+                    <div>
+                        <input type="text" placeholder="Enter Product Name" id="txtprod" name="product" class="form-control" />
+
+                    </div>
+                    <div>
+                        <label>Select Unit</label>
+                        <select id="txtUnit" class="form-control">
+                            <option value="0" selected>Select Unit</option>
+
+                        </select>
+                    </div>
+                    <br />
+                    <div>
+
+                        <input type="text" id="txtsellingrate" placeholder="Enter Selling Rate" class="form-control" />
+                    </div>
+                    <br />
+                    <div>
+
+                        <input type="text" id="txttax" placeholder="Enter Tax" class="form-control" />
+                    </div>
+                    <br />
+                    <div>
+
+                        <input type="button" id="btnAddProduct" value="Add Product" class="btn btn-outline-warning m-2" />
+                        @*   <input type="button" id="btncancel" value="Cancel" class="btn btn-outline-success" />
+                        <input type="button" id="btnupdate" value="Update" class="btn btn-outline-secondary" />*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="modal fade" id="viewcategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Order Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8">
+                            <input type="text" id="txtcat" placeholder="Add Category" class="form-control" />
+                            <br />
+                            <button type="button" class="btn btn-outline-info form-control" id="btnAddCategory">Add Category</button>
+
+                        </div>
+                        <div class="col-md-2"></div>
+                </div>
+                <br />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    <div class="row">
+        <div class="modal fade" id="viewsubcategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Order Stock</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8">
+                                <input type="text" id="txtsubcat" placeholder="Add Sub Category" class="form-control" />
+                                <br />
+                                <button type="button" class="btn btn-outline-info form-control" id="btnAddSubCategory">Add SubCategory</button>
+
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <br />
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+

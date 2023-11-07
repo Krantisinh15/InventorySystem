@@ -1,0 +1,218 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Inventory Management</title>
+  
+   
+   <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/layoutstyle.css" rel="stylesheet" />
+      <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    </head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row bg-light">
+            <div class="col-12 text-center fs-2 text-info">
+               
+                <span  style="float:right"> @Html.ActionLink("Logout","Logout","Login", null,new {@class="btn btn-danger"})</span>
+             
+            </div> 
+        </div>
+        @*<div class="row">*@
+          @* <div class="col-md-2">
+                <div class="sidebar">
+                    <a class="active" href="/Dashboard/Index">Dashboard</a>
+                    <br />
+                    <div class="w3-dropdown-hover">
+                        <button class="w3-button">
+                            Customer
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="w3-dropdown-content w3-bar-block">
+                            <a href="/Customer/Index" class="w3-bar-item w3-button">Add Customer</a>
+                            <a href="/Customer/CustomerInfo" class="w3-bar-item w3-button">Customer Info</a>
+                            <a href="/Customer/GetcustomerHistory" class="w3-bar-item w3-button">View Customer History</a>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="w3-dropdown-hover">
+                        <button class="w3-button">
+                            Products
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="w3-dropdown-content w3-bar-block">
+                            <a href="/Product/Index" class="w3-bar-item w3-button">Add Products</a>
+                            <a href="/Product/GetallProducts" class="w3-bar-item w3-button"> View Products</a>
+                        </div>
+                    </div>
+                    <br /> <br />
+                    <div class="w3-dropdown-hover">
+                        <button class="w3-button">
+                             Invoice
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="w3-dropdown-content w3-bar-block">
+                            <a href="/Invoice/Index" class="w3-bar-item w3-button">Create Invoice</a>
+                            <a href="/Invoice/InvoiceDetails" class="w3-bar-item w3-button"> Customer Invoice Details</a>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <a href="/VenderInfo/Index">Vender Information</a>
+                    <br />
+                    <div class="w3-dropdown-hover">
+                        <button class="w3-button">
+                            Maintain Stock
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="w3-dropdown-content w3-bar-block">
+                            <a href="/MaintainStock/Index" class="w3-bar-item w3-button">Available Stock</a>
+                            <a href="/MaintainStock/MaintainOrderStock" class="w3-bar-item w3-button">Order Stock</a>
+                            <a href="/MaintainStock/MaintainReciveStock" class="w3-bar-item w3-button">Recive Stock</a>
+                        </div>
+                    </div>
+                </div>
+
+           
+
+            </div>*@
+            <div class="row">
+
+            <div class="col-md-2">
+
+               @* <div class="sidebar">
+                    <a class="active" href="/Dashboard/Index">Dashboard</a>
+                    <br />
+                    <div class="dropdown">
+                        <a class="dropbtn">Customer</a>
+                        <div class="dropdown-content">
+                            <a href="/Customer/CustomerInfo">Customer Info</a>
+                            <a href="/Customer/GetcustomerHistory">View Customer History</a>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="dropdown">
+                        <a class="dropbtn">Products</a>
+                        <div class="dropdown-content">
+                            <a href="/Product/Index">Add Products</a>
+                            <a href="/Product/GetallProducts">View Products</a>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                 
+                    <div class="dropdown">
+                        <a class="dropbtn">Invoices</a>
+                        <div class="dropdown-content">
+                            <a href="/Invoice/Index">Cereate Invoice</a>
+                            <a href="/Invoice/InvoiceDetails">View Customer Invoice</a>
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <a href="/VenderInfo/Index">Vender Information</a>
+                    <br />
+                    <div class="dropdown">
+                        <a class="dropbtn">Maintain Stock</a>
+                        <div class="dropdown-content">
+                            <a href="/MaintainStock/Index">Availabe Stock</a>
+                            <a href="/MaintainStock/MaintainOrderStock">Order Stock</a>
+                            <a href="/MaintainStock/MaintainReciveStock">Recive Stock</a>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+*@
+
+              <div class="container">
+                    <aside>
+                        <div class="top">
+                            <div class="logo">
+                                <span></span>
+                                <h2 >Inventory<span class="danger"> System</span></h2>
+                            </div>
+                            <div class="close" id="close-btn">
+                                <span class="material-symbols-sharp"> close   </span>                             
+                            </div>
+                        </div>
+                        <div class="sidebar">
+                            <a href="/Dashboard/Index" class="active">
+                                <span class="material-symbols-sharp">dashboard </span>
+                                <h3>Dashboard  </h3>
+                            </a>
+                            <a href="/Customer/CustomerInfo">
+                                <span class="material-symbols-sharp">frame_person</span>
+                                <h3>Customer Info  </h3>
+                            </a> 
+                            <a href="/Customer/GetcustomerHistory">
+                                <span class="material-symbols-sharp"> manage_history </span>
+                                <h3>Customer History  </h3>
+                            </a>
+                            <a href="/Product/Index" >
+                                <span class="material-symbols-sharp">shopping_cart</span>
+                                <h3> Add Product  </h3>
+                            </a>
+                            <a href="/Product/GetallProducts">
+                                <span class="material-symbols-sharp"> inventory</span>
+                                <h3>  Product History </h3>
+                            </a>
+                            <a href="/Invoice/Index">
+                                <span class="material-symbols-sharp">currency_rupee </span>
+                                <h3>Create Invoice  </h3>
+                            </a>
+                            <a href="/Invoice/InvoiceDetails">
+                                <span class="material-symbols-sharp"> money</span>
+                                <h3> Invoice Details </h3>
+                            </a>
+                            <a href="/VenderInfo/Index">
+                                <span class="material-symbols-sharp">contact_mail </span>
+                                <h3>Vender  </h3>
+                            </a>
+                            <a href="/MaintainStock/Index">
+                                <span class="material-symbols-sharp">inventory_2 </span>
+                                <h3>Available Stock  </h3>
+                            </a>  
+                            <a href="/MaintainStock/MaintainOrderStock">
+                                <span class="material-symbols-sharp">order_play </span>
+                                <h3>Order Stock  </h3>
+                            </a> 
+                            <a href="/MaintainStock/MaintainReciveStock">
+                                <span class="material-symbols-sharp"> handshake </span>
+                                <h3>Recive Stock  </h3>
+                            </a>
+
+                          @* <a href="#">
+                                <span class="material-symbols-sharp"> logout</span>
+                                <h3>Logout</h3>
+                            </a>*@
+                        </div>
+                    </aside>
+                </div>
+                         -
+        </div>
+           
+            <div class="col-md-10">@RenderBody()</div>
+
+
+
+        </div>
+
+
+    </div>
+   
+</body>
+
+</html>

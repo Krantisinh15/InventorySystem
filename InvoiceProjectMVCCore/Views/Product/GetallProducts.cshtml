@@ -1,0 +1,82 @@
+﻿
+@{
+    ViewData["Title"] = "GetallProducts";
+    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
+}
+
+<script>
+    $(document).ready(function(){
+        fetchProducts();
+    })
+    function fetchProducts() {
+        $.ajax({
+            url: "/Product/GetallProductsByUserID",
+            method: "Get",
+            contentType: "application/Json",
+            success: function (data) {
+                $("#tblproducts").empty();
+                $.each(data, function (i, d) {
+                    // userid = d.user_id;
+                    // console.log(d);
+                    $("#tblproducts").append("<tr><td>" + (i + 1) + "</td><td>" + d.product_name + "</td><td>" + d.category_name + "</td><td>" + d.subcategory_name + "</td><td>" + d.unit_name + "</td><td>" + d.selling_rate + "</td><td>" + d.tax + "</td><td><button id='btnedit' class='btn btn-outline-primary' onclick='EditProduct(" + d.product_id + ")'><i class='bi bi-pencil'></i></button>&nbsp;&nbsp;<button id='btndelete' class='btn btn-outline-danger' onclick='DeleteProduct(" + d.product_id + ")'><i class='bi bi-shield-fill-x'></i></button></td></tr>")
+                })
+            }
+        })
+
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#tblproducts tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <input type="text" id="myInput" placeholder="Search Product" class="form-control" />
+
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <div>
+                            <table class="table table-responsive table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Sr
+                                        </th>
+                                        <th>Product Name</th>
+                                        <th>Category Name</th>
+                                        <th>Subcategory name</th>
+                                        <th>Unit Name</th>
+                                        <th>Selling Rate</th>
+                                        <th>Tax</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="tblproducts">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-1"></div>
+</div>
